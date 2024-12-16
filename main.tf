@@ -32,3 +32,26 @@ resource "google_compute_firewall" "tf-firewall" {
   source_ranges = var.source-range
   
 }
+
+resource "google_compute_instance" "tf-instances" {
+  for_each = var.vm-instances
+  name = each.key
+  zone = each.value["zone"]
+  machine_type = each.value.type
+  boot_disk {
+    initialize_params {
+      image = "projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20241115"
+      size  = 10
+      type  = "pd-balanced"
+    }
+
+  }
+  network_interface {
+    access_config {
+      network_tier = "PREMIUM"
+    }
+    subnetwork  = google_compute_subnetwork.tf-subnet.id
+    network = google_compute_network.tf-vpc.id
+  }
+
+}

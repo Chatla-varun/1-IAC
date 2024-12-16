@@ -25,3 +25,20 @@ variable "allowed-ports" {
 variable "source-range" {
   default = ["0.0.0.0/0"]
 }
+
+variable "vm-instances" {
+  default = {
+    jenkins-master = {
+      zone = "us-east1-b"
+      type = "e2-medium"
+    },
+    jenkins-slave = {
+      zone = "us-east1-b"
+      type = "n1-standard-1"
+    },
+    ansible = {
+      zone = "us-east1-b"
+      type = "e2-medium"
+    }
+  }
+}
