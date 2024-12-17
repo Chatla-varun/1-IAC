@@ -40,7 +40,7 @@ resource "google_compute_instance" "tf-instances" {
   machine_type = each.value.type
   boot_disk {
     initialize_params {
-      image = "projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20241115"
+      image = data.google_compute_image.tf-machine-image.self_link
       size  = 10
       type  = "pd-balanced"
     }
@@ -54,4 +54,9 @@ resource "google_compute_instance" "tf-instances" {
     network = google_compute_network.tf-vpc.id
   }
 
+}
+
+data "google_compute_image" "tf-machine-image" {
+  project = "ubuntu-os-cloud"
+  family = "ubuntu-2404-lts-amd64"
 }
