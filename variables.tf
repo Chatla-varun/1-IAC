@@ -19,7 +19,7 @@ variable "firewall-name" {
 }
 
 variable "allowed-ports" {
-  default = ["80","8080","8081","9000","22"]
+  default = ["80","8080","8081","9000","22", "3306"]
 }
 
 variable "source-range" {
@@ -28,17 +28,21 @@ variable "source-range" {
 
 variable "vm-instances" {
   default = {
-    jenkins-master = {
+    "jenkins-master" = {
       zone = "us-east1-b"
       type = "e2-medium"
     },
-    jenkins-slave = {
+    "jenkins-slave" = {
       zone = "us-east1-b"
       type = "n1-standard-1"
     },
-    ansible = {
+    "ansible" = {
       zone = "us-east1-b"
       type = "e2-medium"
     }
   }
+}
+
+variable "vm-user" {
+  default = "gangadharpothala8"
 }

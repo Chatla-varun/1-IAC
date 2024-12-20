@@ -54,6 +54,47 @@ resource "google_compute_instance" "tf-instances" {
     network = google_compute_network.tf-vpc.id
   }
 
+# This connection block is help us to connect to vm
+  connection {
+    type = "ssh" # linux
+    user = var.vm-user  #amazon ubuntu #redhat ec2-user
+    host = self.network_interface[0].access_config[0].nat_ip
+    #We need to private key connect but before that public should be available #lets create keys dynamically or manually
+    private_key = tls_private_key.tf-sshkey.private_key_pem
+  }
+
+  metadata = {
+    ssh-keys = "${var.vm-user}:${tls_private_key.tf-sshkey.public_key_openssh}"
+  }
+
+  #Provisioners(file local, remote) to here we are using file to copy ansible.sh to ansible machine
+
+  provisioner "file" {
+    source = each.key == "ansible" ? "ansible.sh" : "other.sh"
+    destination = each.key == "ansible" ? "/home/${var.vm-user}/ansible.sh": "/home/${var.vm-user}/other.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [ 
+      each.key == "ansible" ? "chmod +x /home/${var.vm-user}/ansible.sh && sh /home/${var.vm-user}/ansible.sh" : "echo 'skipping the command'"
+     ]
+  }
+}
+
+# Generation of RSA key dynamically of size 4096 bits for vm access 
+resource "tls_private_key" "tf-sshkey" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "local_file" "tf-private_key" {
+  content  = tls_private_key.tf-sshkey.private_key_pem
+  filename = "${path.module}/id_rsa"
+}
+
+resource "local_file" "tf-public_key" {
+  content  = tls_private_key.tf-sshkey.public_key_openssh
+  filename = "${path.module}/id_rsa.pub"
 }
 
 data "google_compute_image" "tf-machine-image" {
